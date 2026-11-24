@@ -1334,7 +1334,7 @@ static void test_hy3_tool_analysis(testing & t) {
     inputs.tool_choice      = COMMON_CHAT_TOOL_CHOICE_AUTO;
     inputs.reasoning_format = COMMON_REASONING_FORMAT_NONE;
 
-    auto parser = analysis.build_parser(inputs);
+    auto parser = analysis.build_parser(inputs, "");
     std::string output =
         "<tool_calls:opensource>\n"
         "<tool_call:opensource>test_function_name<tool_sep:opensource>\n"

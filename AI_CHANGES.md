@@ -219,3 +219,17 @@ byte 2: v2[5:4] | v3[5:0]<<2
 **Why:** fork lazy grammar was suppressed while budget sampler counted, and budget watched only ONE end tag; Qwen3.8 emits <tool_call> inside unclosed thinking → budget never DONE → tool grammar never activated → malformed <function=...> calls. Fix restores multi-turn tool calling.
 
 **Validation:** compiles clean; probe 2 consecutive tool calls across turns parse (3/3 @ temp 0.2, 1/3 @ 0.7); toy edit task 3/3 passes. Uncommitted history: prior stack backed up in engine-bin-backup-pre26262/ + oldlib/.
+
+---
+
+## Session 004 — 2026-11-24
+
+**Scope:** Follow-up on the Session 003 backport (PR #88), rebased onto main fb08d7cdb. Tests only.
+
+| Change | File(s) | Detail |
+|--------|---------|--------|
+| Compile fixes | tests/test-chat.cpp, tests/test-chat-auto-parser.cpp | `thinking_end_tag` -> `thinking_end_tags` loop; `build_parser(inputs, "")` |
+| Upstream tests | tests/test-reasoning-budget.cpp, tests/peg-parser/test-gbnf-generation.cpp | Taken from llama.cpp 1d2869c6e to match the ported multi-sequence budget API and trie-based `until` grammar |
+| #26252 tests | tests/test-chat.cpp, tests/test-chat-peg-parser.cpp | Applied the test hunks of llama.cpp #26252 (tool call inside thinking, missing opening `<tool_call>`, required-arg permutation, `permute`) |
+
+**Still failing on CPU (all pass on main):** test-chat (NVIDIA-Nemotron-Nano-v2 now yields `<think>` as content; upstream changed that test after the fork base), test-chat-auto-parser (`compare_variants template failure`: the ported ERR_TMPL check expects jinja to throw on a missing field), test-json-schema-to-grammar (`min 0` space placement differs from both the fork and upstream expectations).
